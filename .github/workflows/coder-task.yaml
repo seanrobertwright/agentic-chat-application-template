@@ -1,0 +1,26 @@
+name: Start Coder Task
+on:
+  issues:
+    types: [labeled]
+permissions:
+  issues: write
+jobs:
+  coder-create-task:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'coder'
+    steps:
+      - name: Coder Create Task
+        uses: coder/create-task-action@v0
+        with:
+          coder-url: ${{ secrets.CODER_URL }}
+          coder-token: ${{ secrets.CODER_TOKEN }}
+          coder-template-name: "tasks-docker"
+          coder-task-prompt: |
+            Use the gh CLI to read the GitHub issue at ${{ github.event.issue.html_url }}.
+            Understand the request, clone the repo, create a branch named fix/issue-${{ github.event.issue.number }},
+            implement the changes described in the issue, commit your work, push the branch,
+            and open a PR via `gh pr create` that references the issue.
+          github-user-id: ${{ github.event.sender.id }}
+          github-issue-url: ${{ github.event.issue.html_url }}
+          github-token: ${{ github.token }}
+          comment-on-issue: true
