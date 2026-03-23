@@ -110,6 +110,13 @@ src/features/chat/
 └── tests/         # Feature tests
 ```
 
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/my-change`)
+3. Run `bun install` and `bun test` to verify
+4. Commit and open a PR
+
 ## License
 
 MIT
