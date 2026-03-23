@@ -14,7 +14,7 @@ jobs:
         with:
           coder-url: ${{ secrets.CODER_URL }}
           coder-token: ${{ secrets.CODER_TOKEN }}
-          coder-template-name: "tasks-docker"
+          coder-template-name: "github-issues"
           coder-task-prompt: |
             Use the gh CLI to read the GitHub issue at ${{ github.event.issue.html_url }}.
             Understand the request, clone the repo, create a branch named fix/issue-${{ github.event.issue.number }},
