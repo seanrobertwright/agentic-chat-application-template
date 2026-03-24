@@ -1,7 +1,7 @@
 "use client";
 
-import { MessageSquare } from "lucide-react";
-import { useCallback, useState } from "react";
+import { MessageSquare, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChat } from "@/hooks/use-chat";
@@ -27,6 +27,37 @@ export function ChatLayout() {
   } = useChat();
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isUnhealthy, setIsUnhealthy] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  const checkHealth = useCallback(async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 3000);
+      const response = await fetch("/api/health", { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (response.ok) {
+        setIsUnhealthy(false);
+        setIsDismissed(false);
+      } else {
+        setIsUnhealthy(true);
+      }
+    } catch {
+      setIsUnhealthy(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    void checkHealth();
+    const interval = setInterval(() => {
+      void checkHealth();
+    }, 30000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [checkHealth]);
 
   const activeTitle = conversations.find((c) => c.id === activeConversationId)?.title ?? null;
 
@@ -54,6 +85,23 @@ export function ChatLayout() {
       />
 
       <div className="chat-gradient-bg flex flex-1 flex-col">
+        {isUnhealthy && !isDismissed && (
+          <div className="flex items-center justify-between bg-amber-100 px-4 py-2 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
+            <span className="text-sm font-medium">
+              Unable to reach the server. Some features may be unavailable.
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setIsDismissed(true);
+              }}
+              className="ml-4 rounded p-1 hover:bg-amber-200 dark:hover:bg-amber-800"
+              aria-label="Dismiss"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
         <ChatHeader title={activeTitle} onToggleSidebar={toggleSidebar} />
 
         {isLoadingMessages && activeConversationId ? (
